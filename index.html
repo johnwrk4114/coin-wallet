@@ -70,8 +70,8 @@ function login() {
     const pass = document.getElementById("password").value;
 
     let users = JSON.parse(localStorage.getItem("users")) || {};
-
     if (users[user] && users[user] === pass) {
+        // 登录成功 → 保存当前账号
         localStorage.setItem("currentUser", user);
         window.location.href = "dashboard.html";
     } else {
