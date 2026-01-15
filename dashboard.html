@@ -106,4 +106,20 @@ window.onload = function() {
 <script src="user-data.js"></script>
 
 </body>
+    <script>
+window.onload = function() {
+    const currentUser = localStorage.getItem("currentUser");
+    if (!currentUser) {
+        alert("No user logged in");
+        window.location.href = "index.html";
+        return;
+    }
+    const data = getUserData(currentUser);
+    if (data) {
+        document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
+        document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
+    }
+}
+</script>
+
 </html>
