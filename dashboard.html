@@ -56,8 +56,8 @@
 
     <div class="card">
         <h3>Account Overview</h3>
-        <p>Balance: <strong>$10,000.00</strong></p>
-        <p>Equity: <strong>$10,250.50</strong></p>
+        <p>Balance: <strong id="balance">$0</strong></p>
+        <p>Equity: <strong id="equity">$0</strong></p>
     </div>
 
     <div class="card">
@@ -87,6 +87,22 @@
     </div>
 
 </div>
+<script src="user-data.js"></script>
+<script>
+window.onload = function() {
+    const currentUser = localStorage.getItem("currentUser");
+    if (!currentUser) {
+        alert("No user logged in");
+        window.location.href = "index.html";
+        return;
+    }
+    const data = getUserData(currentUser);
+    if (data) {
+        document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
+        document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
+    }
+}
+</script>
 
 </body>
 </html>
