@@ -2,35 +2,25 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>Crypto Portfolio</title>
+<title>Crypto Pro Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 <style>
 body {
     margin:0;
     background:#0a0f1a;
-    font-family: 'Roboto', Arial, sans-serif;
+    font-family: 'Roboto', sans-serif;
     color:#fff;
 }
-
 header {
     background:#0f1526;
     padding:20px;
     display:flex;
     justify-content:space-between;
     align-items:center;
-    box-shadow:0 3px 10px rgba(0,0,0,0.5);
+    box-shadow:0 4px 15px rgba(0,0,0,0.6);
 }
-
-header h2 {
-    margin:0;
-    font-size:18px;
-}
-
-header .user-info {
-    display:flex;
-    flex-direction:column;
-    align-items:flex-end;
-}
-
+header h2 { margin:0; font-size:18px; color:#3ddc97; letter-spacing:1px; }
+header .user-info { display:flex; flex-direction:column; align-items:flex-end; }
 header .logout {
     margin-top:5px;
     padding:6px 12px;
@@ -42,24 +32,21 @@ header .logout {
     font-size:12px;
 }
 
-.container {
-    padding:20px;
-}
+.container { padding:20px; display:flex; flex-direction:column; gap:20px; }
 
 .card {
     background:#121833;
     padding:20px;
     border-radius:10px;
-    margin-bottom:20px;
-    box-shadow:0 4px 15px rgba(0,0,0,0.3);
+    box-shadow:0 6px 20px rgba(0,0,0,0.4);
 }
 
 .card h3 {
     margin-top:0;
     margin-bottom:15px;
     font-size:18px;
-    letter-spacing:1px;
     color:#3ddc97;
+    letter-spacing:1px;
 }
 
 .table-container {
@@ -68,40 +55,18 @@ header .logout {
     border-radius:10px;
 }
 
-table {
-    width:100%;
-    border-collapse:collapse;
-}
-
-th, td {
-    padding:12px 10px;
-    text-align:left;
-}
-
-th {
-    background:#1a1f33;
-    font-size:13px;
-    text-transform:uppercase;
-    letter-spacing:1px;
-}
-
-tr:nth-child(even) { background:#0f1320; }
-tr:hover { background:#1f2033; }
-
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { padding:12px 10px; text-align:left; }
+th { background:#1a1f33; font-size:13px; text-transform:uppercase; letter-spacing:1px; }
+tr:nth-child(even){background:#0f1320;}
+tr:hover{background:#1f2033;}
+.rank { width:40px; text-align:center; }
 .symbol { font-weight:600; }
-.price { text-align:right; transition:all 0.5s ease; }
-.change { text-align:right; }
-.rank { text-align:center; width:40px; }
-.green { color:#3ddc97; transition:color 0.3s; }
-.red { color:#ff6b6b; transition:color 0.3s; }
+.price, .change { text-align:right; transition:all 0.5s ease; }
+.green { color:#3ddc97; }
+.red { color:#ff6b6b; }
 
-.pagination {
-    margin-top:10px;
-    display:flex;
-    justify-content:center;
-    gap:10px;
-}
-
+.pagination { margin-top:10px; display:flex; justify-content:center; gap:10px; }
 .page-btn {
     padding:6px 12px;
     background:#1f6bff;
@@ -112,17 +77,18 @@ tr:hover { background:#1f2033; }
     font-size:12px;
     transition:all 0.3s;
 }
+.page-btn:hover { background:#3ddc97; }
 
-.page-btn:hover {
-    background:#3ddc97;
+.sparkline {
+    width:100px;
+    height:30px;
 }
-
 </style>
 </head>
 <body>
 
 <header>
-    <h2>Crypto Portfolio</h2>
+    <h2>Crypto Pro Dashboard</h2>
     <div class="user-info">
         <div>Username: <span id="username"></span></div>
         <div>Email: <span id="email"></span></div>
@@ -131,6 +97,7 @@ tr:hover { background:#1f2033; }
 </header>
 
 <div class="container">
+
     <div class="card">
         <h3>Account Overview</h3>
         <p>Balance: <strong id="balance">$0</strong></p>
@@ -147,6 +114,7 @@ tr:hover { background:#1f2033; }
                         <th>Symbol</th>
                         <th class="price">Price (USD)</th>
                         <th class="change">24h %</th>
+                        <th>Sparkline</th>
                     </tr>
                 </thead>
                 <tbody id="market-table"></tbody>
@@ -154,101 +122,118 @@ tr:hover { background:#1f2033; }
         </div>
         <div class="pagination" id="pagination"></div>
     </div>
+
 </div>
 
 <script src="user-data.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-let coinList = []; // 存储前100币种
-const priceMap = {}; // 用于检测价格跳动
+let coinList = [];
+const priceMap = {};
 const itemsPerPage = 10;
 let currentPage = 1;
 
 // 页面初始化
 window.onload = async function() {
     const currentUser = localStorage.getItem("currentUser");
-    if (!currentUser) {
-        alert("No user logged in");
-        window.location.href = "index.html";
-        return;
-    }
-
+    if(!currentUser){alert("No user logged in"); window.location.href="index.html"; return;}
     document.getElementById("username").innerText = currentUser;
-    // 你可以在 user-data.js 里增加 email 字段
     const data = getUserData(currentUser);
     document.getElementById("email").innerText = data.email || "user@example.com";
-    document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
-    document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
+    document.getElementById("balance").innerText = "$"+data.balance.toLocaleString();
+    document.getElementById("equity").innerText = "$"+data.equity.toLocaleString();
 
     await fetchTop100();
-    setInterval(fetchTop100, 10000); // 每10秒刷新
+    setInterval(fetchTop100,10000);
 }
 
 // 注销
 function logout() {
     localStorage.removeItem("currentUser");
-    window.location.href = "index.html";
+    window.location.href="index.html";
 }
 
-// 获取Top100加密货币
-async function fetchTop100() {
-    const url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h";
-    try {
+// 获取 Top100 加密货币 + Sparkline
+async function fetchTop100(){
+    const url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h";
+    try{
         const res = await fetch(url);
         coinList = await res.json();
         displayPage(currentPage);
         setupPagination();
-    } catch (err) {
-        console.error("Fetch error:", err);
-    }
+    }catch(err){console.error("Fetch error:",err);}
 }
 
 // 分页显示
-function displayPage(page) {
+function displayPage(page){
     currentPage = page;
     const tbody = document.getElementById("market-table");
-    tbody.innerHTML = "";
+    tbody.innerHTML="";
+    const start = (page-1)*itemsPerPage;
+    const end = start+itemsPerPage;
+    const pageCoins = coinList.slice(start,end);
 
-    const start = (page -1) * itemsPerPage;
-    const end = start + itemsPerPage;
-    const pageCoins = coinList.slice(start, end);
-
-    pageCoins.forEach((coin, idx) => {
+    pageCoins.forEach((coin,idx)=>{
         const change = (coin.price_change_percentage_24h ?? 0).toFixed(2);
-        const changeClass = change >=0 ? "green" : "red";
+        const changeClass = change>=0?"green":"red";
 
-        // 动态价格跳动效果
+        // 动态价格跳动
         let prevPrice = priceMap[coin.id] ?? coin.current_price;
         let priceClass = "";
-        if (coin.current_price > prevPrice) priceClass = "green";
-        else if (coin.current_price < prevPrice) priceClass = "red";
-        priceMap[coin.id] = coin.current_price;
+        if(coin.current_price>prevPrice) priceClass="green";
+        else if(coin.current_price<prevPrice) priceClass="red";
+        priceMap[coin.id]=coin.current_price;
 
         const tr = document.createElement("tr");
-        tr.innerHTML = `
-            <td class="rank">${start + idx + 1}</td>
+        tr.innerHTML=`
+            <td class="rank">${start+idx+1}</td>
             <td class="symbol">${coin.symbol.toUpperCase()}</td>
             <td class="price ${priceClass}">$${Number(coin.current_price).toLocaleString()}</td>
             <td class="change ${changeClass}">${change}%</td>
+            <td><canvas id="sparkline-${coin.id}" class="sparkline"></canvas></td>
         `;
         tbody.appendChild(tr);
+
+        // 绘制小图表
+        const ctx = document.getElementById(`sparkline-${coin.id}`).getContext('2d');
+        new Chart(ctx,{
+            type:'line',
+            data:{
+                labels:coin.sparkline_in_7d.price.map((_,i)=>i),
+                datasets:[{
+                    data:coin.sparkline_in_7d.price,
+                    borderColor:'#3ddc97',
+                    borderWidth:1,
+                    pointRadius:0,
+                    fill:false,
+                    tension:0.3
+                }]
+            },
+            options:{
+                responsive:true,
+                maintainAspectRatio:false,
+                plugins:{legend:{display:false}},
+                elements:{line:{borderWidth:1}, point:{radius:0}},
+                scales:{x:{display:false}, y:{display:false}}
+            }
+        });
     });
 }
 
 // 分页按钮
-function setupPagination() {
-    const totalPages = Math.ceil(coinList.length / itemsPerPage);
+function setupPagination(){
+    const totalPages = Math.ceil(coinList.length/itemsPerPage);
     const container = document.getElementById("pagination");
-    container.innerHTML = "";
-    for(let i=1; i<=totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.className = "page-btn";
-        btn.innerText = i;
-        if(i === currentPage) btn.style.background="#3ddc97";
-        btn.onclick = ()=> displayPage(i);
+    container.innerHTML="";
+    for(let i=1;i<=totalPages;i++){
+        const btn=document.createElement("button");
+        btn.className="page-btn";
+        btn.innerText=i;
+        if(i===currentPage) btn.style.background="#3ddc97";
+        btn.onclick=()=>displayPage(i);
         container.appendChild(btn);
     }
 }
-
 </script>
 </body>
 </html>
