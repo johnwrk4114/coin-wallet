@@ -2,7 +2,7 @@
 // 专门管理账号数据（localStorage版）
 
 // 初始化账号数据，如果不存在
-function initUserData(user, balance = 10000, equity = 10250) {
+function initUserData(user, balance = 0, equity = 0) {
     let userData = JSON.parse(localStorage.getItem("userData")) || {};
     if (!userData[user]) {
         userData[user] = { balance, equity };
@@ -23,5 +23,5 @@ function setUserData(user, newData) {
 // 获取账号数据
 function getUserData(user) {
     let userData = JSON.parse(localStorage.getItem("userData")) || {};
-    return userData[user] || null;
+    return userData[user] || { balance:0, equity:0 };
 }
