@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Panel</title>
+    <script src="user-data.js"></script>
+    <style>
+        body { font-family: Arial; background:#0b0f19; color:#fff; display:flex; justify-content:center; align-items:center; height:100vh; }
+        .box { background:#121826; padding:20px; border-radius:10px; width:400px; }
+        input, button { width:100%; margin:5px 0; padding:10px; border-radius:5px; border:none; }
+        button { background:#1f6bff; color:#fff; cursor:pointer; }
+    </style>
+</head>
+<body>
+<div class="box">
+    <h2>Admin Modify User Data</h2>
+
+    <input id="username" placeholder="账号用户名 (test01)">
+    <input id="balance" type="number" placeholder="Balance">
+    <input id="equity" type="number" placeholder="Equity">
+    <button onclick="updateUser()">Update User Data</button>
+
+    <div id="msg" style="margin-top:10px;color:#3ddc97;"></div>
+</div>
+
+<script>
+function updateUser() {
+    const user = document.getElementById("username").value;
+    const balance = parseFloat(document.getElementById("balance").value);
+    const equity = parseFloat(document.getElementById("equity").value);
+
+    if (!user || isNaN(balance) || isNaN(equity)) {
+        alert("请填写完整信息");
+        return;
+    }
+
+    setUserData(user, { balance, equity });
+    document.getElementById("msg").innerText = `User ${user} data updated!`;
+}
+</script>
+
+</body>
+</html>
+
