@@ -56,6 +56,11 @@
     <input type="text" id="username" placeholder="Username">
     <input type="password" id="password" placeholder="Password">
     <button onclick="login()">Login</button>
+
+    <p style="text-align:center;margin-top:10px;">
+    <a href="register.html" style="color:#1f6bff;">Create account</a>
+</p>
+
     <div class="error" id="error">Invalid username or password</div>
 </div>
 
@@ -64,8 +69,10 @@ function login() {
     const user = document.getElementById("username").value;
     const pass = document.getElementById("password").value;
 
-    // 演示账号（写死）
-    if (user === "admin" && pass === "123456") {
+    let users = JSON.parse(localStorage.getItem("users")) || {};
+
+    if (users[user] && users[user] === pass) {
+        localStorage.setItem("currentUser", user);
         window.location.href = "dashboard.html";
     } else {
         document.getElementById("error").style.display = "block";
