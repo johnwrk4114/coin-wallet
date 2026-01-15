@@ -78,7 +78,7 @@ function register() {
     localStorage.setItem("users", JSON.stringify(users));
 
     // 初始化账号数据（调用 user-data.js）
-    initUserData(user, 10000, 10250);
+    initUserData(user, 0, 0);
 
     document.getElementById("msg").innerText = "Register success, go to login";
 }
