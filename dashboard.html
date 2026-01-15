@@ -2,91 +2,22 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-    <title>Trading Dashboard</title>
+    <title>Dashboard</title>
     <style>
-        body {
-            margin: 0;
-            background: #0b0f19;
-            font-family: Arial;
-            color: #fff;
-        }
-        .header {
-            padding: 15px 30px;
-            background: #121826;
-            font-size: 20px;
-        }
-        .container {
-            padding: 30px;
-        }
-        .card {
-            background: #121826;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th, td {
-            padding: 12px;
-            text-align: left;
-        }
-        th {
-            background: #1a2035;
-        }
-        tr:nth-child(even) {
-            background: #161c2e;
-        }
-        .green {
-            color: #3ddc97;
-        }
-        .red {
-            color: #ff5c5c;
-        }
+        body { margin:0; height:100vh; background:#0b0f19; font-family:Arial; color:#fff; display:flex; justify-content:center; align-items:center; }
+        .card { background:#121826; padding:30px; border-radius:10px; width:350px; text-align:center; }
+        h2 { margin-bottom:20px; }
+        p { font-size:18px; margin:10px 0; }
     </style>
 </head>
 <body>
 
-<div class="header">
-    Trading Platform Dashboard
+<div class="card">
+    <h2>Dashboard</h2>
+    <p>Balance: <strong id="balance">$0</strong></p>
+    <p>Equity: <strong id="equity">$0</strong></p>
 </div>
 
-<div class="container">
-
-    <div class="card">
-        <h3>Account Overview</h3>
-        <p>Balance: <strong id="balance">$0</strong></p>
-        <p>Equity: <strong id="equity">$0</strong></p>
-    </div>
-
-    <div class="card">
-        <h3>Market Prices (Demo)</h3>
-        <table>
-            <tr>
-                <th>Symbol</th>
-                <th>Price</th>
-                <th>Change</th>
-            </tr>
-            <tr>
-                <td>BTC/USD</td>
-                <td>$42,300</td>
-                <td class="green">+1.25%</td>
-            </tr>
-            <tr>
-                <td>ETH/USD</td>
-                <td>$2,280</td>
-                <td class="red">-0.45%</td>
-            </tr>
-            <tr>
-                <td>AAPL</td>
-                <td>$189.20</td>
-                <td class="green">+0.62%</td>
-            </tr>
-        </table>
-    </div>
-
-</div>
 <script src="user-data.js"></script>
 <script>
 window.onload = function() {
@@ -96,30 +27,12 @@ window.onload = function() {
         window.location.href = "index.html";
         return;
     }
+
     const data = getUserData(currentUser);
-    if (data) {
-        document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
-        document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
-    }
+    document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
+    document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
 }
 </script>
-<script src="user-data.js"></script>
 
 </body>
-    <script>
-window.onload = function() {
-    const currentUser = localStorage.getItem("currentUser");
-    if (!currentUser) {
-        alert("No user logged in");
-        window.location.href = "index.html";
-        return;
-    }
-    const data = getUserData(currentUser);
-    if (data) {
-        document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
-        document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
-    }
-}
-</script>
-
 </html>
