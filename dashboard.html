@@ -4,26 +4,34 @@
 <meta charset="UTF-8">
 <title>Dashboard</title>
 <style>
-body { margin:0; background:#0b0f19; font-family:Arial; color:#fff; }
-header { background:#121826; padding:20px; display:flex; justify-content:space-between; align-items:center; }
-header h2 { margin:0; }
+body { margin:0; background:#0b0f19; font-family:Arial, sans-serif; color:#fff; }
+header { background:#121526; padding:15px 20px; display:flex; justify-content:space-between; align-items:center; }
+header h2 { margin:0; font-size:20px; }
+button.logout { padding:8px 15px; background:#1f6bff; color:#fff; border:none; border-radius:4px; cursor:pointer; }
+
 .container { padding:20px; }
-.card { background:#121826; padding:20px; border-radius:10px; margin-bottom:20px; }
-.card p { margin:10px 0; font-size:16px; }
-table { width:100%; border-collapse:collapse; background:#121826; border-radius:10px; overflow:hidden; }
-th, td { padding:12px; text-align:left; }
-th { background:#1a1f33; }
-tr:nth-child(even) { background:#0f1320; }
-tr:hover { background:#1f2233; }
+.card { background:#121526; padding:15px 20px; border-radius:8px; margin-bottom:20px; }
+.card h3 { margin-top:0; margin-bottom:15px; font-size:18px; }
+.table-container { max-height:600px; overflow-y:auto; }
+
+table { width:100%; border-collapse:collapse; margin-top:10px; }
+th, td { padding:10px 8px; border-bottom:1px solid #0f1320; }
+th { background:#1d2230; font-size:14px; }
+td { font-size:13px; }
+tr:hover { background:#1f2436; }
 .green { color:#3ddc97; }
 .red { color:#ff6b6b; }
+.symbol { font-weight:600; }
+.price { text-align:right; }
+.change { text-align:right; }
+.rank { text-align:center; width:50px; }
 </style>
 </head>
 <body>
 
 <header>
-  <h2>Dashboard - <span id="username">User</span></h2>
-  <button onclick="logout()" style="padding:10px; background:#1f6bff; color:#fff; border:none; border-radius:5px; cursor:pointer;">Logout</button>
+  <h2>Dashboard - <span id="username"></span></h2>
+  <button class="logout" onclick="logout()">Logout</button>
 </header>
 
 <div class="container">
@@ -34,34 +42,27 @@ tr:hover { background:#1f2233; }
   </div>
 
   <div class="card">
-    <h3>Market Prices (Fake Data)</h3>
+    <h3>Top 100 Crypto Market Prices</h3>
+    <div class="table-container">
     <table>
       <thead>
         <tr>
+          <th class="rank">#</th>
           <th>Symbol</th>
-          <th>Price</th>
-          <th>Change %</th>
+          <th class="price">Price (USD)</th>
+          <th class="change">24h %</th>
         </tr>
       </thead>
-      <tbody id="market-table">
-        <!-- JS 填充 -->
-      </tbody>
+      <tbody id="market-table"></tbody>
     </table>
+    </div>
   </div>
 </div>
 
 <script src="user-data.js"></script>
 <script>
-// 模拟市场数据
-const marketData = [
-  { symbol: 'BTC/USD', price: 25000, change: 2.3 },
-  { symbol: 'ETH/USD', price: 1700, change: -1.2 },
-  { symbol: 'AAPL', price: 155, change: 0.8 },
-  { symbol: 'TSLA', price: 720, change: -0.5 },
-  { symbol: 'GOOG', price: 2800, change: 1.1 }
-];
 
-window.onload = function() {
+window.onload = async function() {
     const currentUser = localStorage.getItem("currentUser");
     if (!currentUser) {
         alert("No user logged in");
@@ -74,25 +75,44 @@ window.onload = function() {
     document.getElementById("balance").innerText = "$" + data.balance.toLocaleString();
     document.getElementById("equity").innerText = "$" + data.equity.toLocaleString();
 
-    const tableBody = document.getElementById("market-table");
-    tableBody.innerHTML = '';
-    marketData.forEach(item => {
-        const tr = document.createElement('tr');
-        const changeClass = item.change >= 0 ? 'green' : 'red';
-        tr.innerHTML = `
-            <td>${item.symbol}</td>
-            <td>$${item.price.toLocaleString()}</td>
-            <td class="${changeClass}">${item.change.toFixed(2)}%</td>
-        `;
-        tableBody.appendChild(tr);
-    });
+    await fetchTop100();
+    setInterval(fetchTop100, 30000);
 }
 
-// 注销
 function logout() {
     localStorage.removeItem("currentUser");
     window.location.href = "index.html";
 }
+
+async function fetchTop100() {
+    const url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&price_change_percentage=24h";
+
+    try {
+        const res = await fetch(url);
+        const list = await res.json();
+
+        const body = document.getElementById("market-table");
+        body.innerHTML = "";
+
+        list.forEach((coin, index) => {
+            const change = (coin.price_change_percentage_24h ?? 0).toFixed(2);
+            const changeClass = change >= 0 ? "green" : "red";
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="rank">${index + 1}</td>
+                <td class="symbol">${coin.symbol.toUpperCase()}</td>
+                <td class="price">$${Number(coin.current_price).toLocaleString()}</td>
+                <td class="change ${changeClass}">${change}%</td>
+            `;
+            body.appendChild(tr);
+        });
+
+    } catch (err) {
+        console.error("Fetch error:", err);
+    }
+}
+
 </script>
 
 </body>
