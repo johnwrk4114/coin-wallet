@@ -67,18 +67,25 @@ function register() {
         return;
     }
 
+    // 获取已注册用户
     let users = JSON.parse(localStorage.getItem("users")) || {};
-
     if (users[user]) {
         alert("User already exists");
         return;
     }
 
+    // 保存账号密码
     users[user] = pass;
     localStorage.setItem("users", JSON.stringify(users));
 
+    // 初始化该账号的数据
+    let userData = JSON.parse(localStorage.getItem("userData")) || {};
+    userData[user] = { balance: 10000, equity: 10250 };
+    localStorage.setItem("userData", JSON.stringify(userData));
+
     document.getElementById("msg").innerText = "Register success, go to login";
 }
+
 </script>
 
 </body>
