@@ -71,13 +71,13 @@ function login() {
 
     let users = JSON.parse(localStorage.getItem("users")) || {};
     if (users[user] && users[user] === pass) {
-        // 登录成功 → 保存当前账号
         localStorage.setItem("currentUser", user);
         window.location.href = "dashboard.html";
     } else {
         document.getElementById("error").style.display = "block";
     }
 }
+
 </script>
 <script src="user-data.js"></script>
 
