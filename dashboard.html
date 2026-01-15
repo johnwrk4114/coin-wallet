@@ -2,93 +2,47 @@
 <html lang="zh">
 <head>
 <meta charset="UTF-8">
-<title>Crypto Pro Dashboard</title>
+<title>Crypto Pro Trading</title>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-body {
-    margin:0;
-    background:#0a0f1a;
-    font-family: 'Roboto', sans-serif;
-    color:#fff;
-}
-header {
-    background:#0f1526;
-    padding:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    box-shadow:0 4px 15px rgba(0,0,0,0.6);
-}
-header h2 { margin:0; font-size:18px; color:#3ddc97; letter-spacing:1px; }
-header .user-info { display:flex; flex-direction:column; align-items:flex-end; }
-header .logout {
-    margin-top:5px;
-    padding:6px 12px;
-    background:#1f6bff;
-    color:#fff;
-    border:none;
-    border-radius:5px;
-    cursor:pointer;
-    font-size:12px;
-}
+body { margin:0; background:#0a0f1a; font-family: 'Roboto', sans-serif; color:#fff;}
+header { background:#0f1526; padding:20px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 4px 15px rgba(0,0,0,0.6);}
+header h2 { margin:0; font-size:18px; color:#3ddc97; letter-spacing:1px;}
+header .user-info { display:flex; flex-direction:column; align-items:flex-end;}
+header .logout { margin-top:5px; padding:6px 12px; background:#1f6bff; color:#fff; border:none; border-radius:5px; cursor:pointer; font-size:12px;}
 
-.container { padding:20px; display:flex; flex-direction:column; gap:20px; }
-
-.card {
-    background:#121833;
-    padding:20px;
-    border-radius:10px;
-    box-shadow:0 6px 20px rgba(0,0,0,0.4);
-}
-
-.card h3 {
-    margin-top:0;
-    margin-bottom:15px;
-    font-size:18px;
-    color:#3ddc97;
-    letter-spacing:1px;
-}
-
-.table-container {
-    max-height:450px;
-    overflow-y:auto;
-    border-radius:10px;
-}
-
-table { width:100%; border-collapse:collapse; margin-top:10px; }
-th, td { padding:12px 10px; text-align:left; }
-th { background:#1a1f33; font-size:13px; text-transform:uppercase; letter-spacing:1px; }
+.container { padding:20px; display:flex; flex-direction:column; gap:20px;}
+.card { background:#121833; padding:20px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.4);}
+.card h3 { margin-top:0; margin-bottom:15px; font-size:18px; color:#3ddc97; letter-spacing:1px;}
+.table-container { max-height:450px; overflow-y:auto; border-radius:10px;}
+table { width:100%; border-collapse:collapse; margin-top:10px;}
+th, td { padding:12px 10px; text-align:left;}
+th { background:#1a1f33; font-size:13px; text-transform:uppercase; letter-spacing:1px;}
 tr:nth-child(even){background:#0f1320;}
 tr:hover{background:#1f2033;}
 .rank { width:40px; text-align:center; }
-.symbol { font-weight:600; }
+.symbol { font-weight:600; cursor:pointer; }
 .price, .change { text-align:right; transition:all 0.5s ease; }
 .green { color:#3ddc97; }
 .red { color:#ff6b6b; }
-
-.pagination { margin-top:10px; display:flex; justify-content:center; gap:10px; }
-.page-btn {
-    padding:6px 12px;
-    background:#1f6bff;
-    color:#fff;
-    border:none;
-    border-radius:4px;
-    cursor:pointer;
-    font-size:12px;
-    transition:all 0.3s;
-}
+.sparkline { width:100px; height:30px; }
+.pagination { margin-top:10px; display:flex; justify-content:center; gap:10px;}
+.page-btn { padding:6px 12px; background:#1f6bff; color:#fff; border:none; border-radius:4px; cursor:pointer; font-size:12px; transition:all 0.3s;}
 .page-btn:hover { background:#3ddc97; }
 
-.sparkline {
-    width:100px;
-    height:30px;
-}
+#kline-container { margin-top:20px; background:#121833; padding:20px; border-radius:10px; box-shadow:0 6px 20px rgba(0,0,0,0.4);}
+#kline-chart { width:100%; height:400px;}
+.search-container { margin-bottom:10px;}
+.search-input { padding:6px 12px; width:200px; border-radius:4px; border:none; }
+.trade-btn { padding:4px 8px; margin-left:5px; background:#1f6bff; border:none; border-radius:4px; cursor:pointer; font-size:12px; color:#fff; }
+.trade-btn:hover { background:#3ddc97; }
 </style>
 </head>
 <body>
 
 <header>
-    <h2>Crypto Pro Dashboard</h2>
+    <h2>Crypto Pro Trading</h2>
     <div class="user-info">
         <div>Username: <span id="username"></span></div>
         <div>Email: <span id="email"></span></div>
@@ -97,7 +51,6 @@ tr:hover{background:#1f2033;}
 </header>
 
 <div class="container">
-
     <div class="card">
         <h3>Account Overview</h3>
         <p>Balance: <strong id="balance">$0</strong></p>
@@ -106,6 +59,9 @@ tr:hover{background:#1f2033;}
 
     <div class="card">
         <h3>Top Cryptocurrencies</h3>
+        <div class="search-container">
+            <input class="search-input" id="search" placeholder="Search symbol..." oninput="applySearch()">
+        </div>
         <div class="table-container">
             <table>
                 <thead>
@@ -115,6 +71,7 @@ tr:hover{background:#1f2033;}
                         <th class="price">Price (USD)</th>
                         <th class="change">24h %</th>
                         <th>Sparkline</th>
+                        <th>Trade</th>
                     </tr>
                 </thead>
                 <tbody id="market-table"></tbody>
@@ -123,15 +80,21 @@ tr:hover{background:#1f2033;}
         <div class="pagination" id="pagination"></div>
     </div>
 
+    <div id="kline-container" class="card" style="display:none;">
+        <h3 id="kline-title"></h3>
+        <canvas id="kline-chart"></canvas>
+    </div>
+
 </div>
 
 <script src="user-data.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
 let coinList = [];
+let filteredList = [];
 const priceMap = {};
 const itemsPerPage = 10;
 let currentPage = 1;
+let klineChart = null;
 
 // 页面初始化
 window.onload = async function() {
@@ -144,7 +107,7 @@ window.onload = async function() {
     document.getElementById("equity").innerText = "$"+data.equity.toLocaleString();
 
     await fetchTop100();
-    setInterval(fetchTop100,10000);
+    setInterval(fetchTop100,5000);
 }
 
 // 注销
@@ -153,12 +116,13 @@ function logout() {
     window.location.href="index.html";
 }
 
-// 获取 Top100 加密货币 + Sparkline
+// 获取Top100加密货币 + sparkline
 async function fetchTop100(){
     const url = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=true&price_change_percentage=24h";
     try{
         const res = await fetch(url);
         coinList = await res.json();
+        filteredList = coinList;
         displayPage(currentPage);
         setupPagination();
     }catch(err){console.error("Fetch error:",err);}
@@ -171,13 +135,13 @@ function displayPage(page){
     tbody.innerHTML="";
     const start = (page-1)*itemsPerPage;
     const end = start+itemsPerPage;
-    const pageCoins = coinList.slice(start,end);
+    const pageCoins = filteredList.slice(start,end);
 
     pageCoins.forEach((coin,idx)=>{
         const change = (coin.price_change_percentage_24h ?? 0).toFixed(2);
         const changeClass = change>=0?"green":"red";
 
-        // 动态价格跳动
+        // 平滑价格跳动
         let prevPrice = priceMap[coin.id] ?? coin.current_price;
         let priceClass = "";
         if(coin.current_price>prevPrice) priceClass="green";
@@ -187,14 +151,18 @@ function displayPage(page){
         const tr = document.createElement("tr");
         tr.innerHTML=`
             <td class="rank">${start+idx+1}</td>
-            <td class="symbol">${coin.symbol.toUpperCase()}</td>
+            <td class="symbol" onclick="showKline('${coin.id}','${coin.symbol.toUpperCase()}')">${coin.symbol.toUpperCase()}</td>
             <td class="price ${priceClass}">$${Number(coin.current_price).toLocaleString()}</td>
             <td class="change ${changeClass}">${change}%</td>
             <td><canvas id="sparkline-${coin.id}" class="sparkline"></canvas></td>
+            <td>
+                <button class="trade-btn" onclick="alert('Buy ${coin.symbol.toUpperCase()}')">Buy</button>
+                <button class="trade-btn" onclick="alert('Sell ${coin.symbol.toUpperCase()}')">Sell</button>
+            </td>
         `;
         tbody.appendChild(tr);
 
-        // 绘制小图表
+        // Sparkline
         const ctx = document.getElementById(`sparkline-${coin.id}`).getContext('2d');
         new Chart(ctx,{
             type:'line',
@@ -222,7 +190,7 @@ function displayPage(page){
 
 // 分页按钮
 function setupPagination(){
-    const totalPages = Math.ceil(coinList.length/itemsPerPage);
+    const totalPages = Math.ceil(filteredList.length/itemsPerPage);
     const container = document.getElementById("pagination");
     container.innerHTML="";
     for(let i=1;i<=totalPages;i++){
@@ -233,6 +201,24 @@ function setupPagination(){
         btn.onclick=()=>displayPage(i);
         container.appendChild(btn);
     }
+}
+
+// 搜索
+function applySearch(){
+    const keyword = document.getElementById("search").value.toLowerCase();
+    filteredList = coinList.filter(c=>c.symbol.toLowerCase().includes(keyword));
+    displayPage(1);
+    setupPagination();
+}
+
+// K线图显示（TradingView 免费嵌入）
+function showKline(id,symbol){
+    document.getElementById("kline-container").style.display="block";
+    document.getElementById("kline-title").innerText=`${symbol} - 7d Chart`;
+
+    // TradingView Widget
+    document.getElementById("kline-container").innerHTML=`<h3>${symbol} - 7d Chart</h3>
+    <iframe src="https://s.tradingview.com/widgetembed/?frameElementId=tradingview_7d&symbol=COINBASE%3A${symbol}USD&interval=60&symboledit=1&toolbarbg=f1f3f6&studies=[]&hideideas=1&theme=dark&style=1&timezone=Etc%2FUTC" width="100%" height="400" frameborder="0" allowtransparency="true" scrolling="no"></iframe>`;
 }
 </script>
 </body>
